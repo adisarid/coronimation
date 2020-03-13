@@ -35,19 +35,18 @@ static_coronamap <- ggplot(corona_db, aes(x, y)) +
 library(gganimate)
 
 coronimation <- ggplot(corona_db, aes(x, y, group = object_id)) +
-  labs(title = "נקודות חשיפה לקורונה בישראל",
+  labs(title = "Corona exposure in Israel",
        subtitle = "{closest_state}",
-       caption = "\u202bמבוסס על נתוני משרד הבריאות http://bit.ly/corona_il\n
-       \u202bנוצר על ידי עדי שריד adi@sarid-ins.co.il") +
+       caption = "Based on MOH data, see http://bit.ly/corona_il\n
+       Created by Adi Sarid https://adisarid.github.io") +
   geom_point() +
   coord_equal() + 
-  transition_states(timestamp_log, transition_length = 1, state_length = 1) + 
-  shadow_mark() + 
+  transition_states(timestamp_log, transition_length = 0, state_length = 0) + 
   enter_fade() + 
-  exit_reset() +
+  shadow_mark(color = "grey") +
   israel_boundaries + 
   saridr::theme_sarid() +
-  theme(plot.title = element_text(hjust = 1),
-        plot.subtitle = element_text(hjust = 1),
+  theme(plot.title = element_text(hjust = 0),
+        plot.subtitle = element_text(hjust = 0),
         axis.text = element_blank(),
         axis.title = element_blank())
