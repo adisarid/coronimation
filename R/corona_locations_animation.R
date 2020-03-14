@@ -3,7 +3,7 @@
 
 library(tidyverse)
 
-corona_db <- read_csv("data/2020-03-13 - corona_locations.csv") %>% 
+corona_db <- read_csv("data/2020-03-14 - corona_locations.csv") %>% 
   set_names(c("object_id",
               "patient_name",
               "location",
@@ -14,18 +14,22 @@ corona_db <- read_csv("data/2020-03-13 - corona_locations.csv") %>%
               "x",
               "y"
               )) %>% 
-  mutate(timestamp_log = lubridate::dmy(timestamp))
+  mutate(timestamp_log = lubridate::dmy(timestamp)) %>% 
+  mutate(is_tourist = ifelse(str_detect(patient_name, "תייר"),
+                             "תייר",
+                             "מקומי"))
 
 israel_boundaries <- borders(database = "world", regions = "israel",
                              size = 0.5)
 
 # Creates a static map ----------------------------------------------------
 
-static_coronamap <- ggplot(corona_db, aes(x, y)) + 
+static_coronamap <- ggplot(corona_db, aes(x, y, color = is_tourist)) + 
   israel_boundaries + 
   geom_point() +
   coord_equal() + 
-  theme_void()
+  theme_void() + 
+  guides(color = guide_legend(""))
 
 
 # Making it dynamic with gganimate ----------------------------------------
@@ -34,18 +38,19 @@ static_coronamap <- ggplot(corona_db, aes(x, y)) +
 
 library(gganimate)
 
-coronimation <- ggplot(corona_db, aes(x, y, group = object_id)) +
+coronimation <- ggplot(corona_db, aes(x, y, group = object_id, color = is_tourist, shape = is_tourist)) +
   labs(title = "Corona exposure in Israel",
        subtitle = "{closest_state}",
        caption = "Based on MOH data, see http://bit.ly/corona_il\n
        Created by Adi Sarid https://adisarid.github.io") +
   geom_point() +
   coord_equal() + 
-  transition_states(timestamp_log, transition_length = 0, state_length = 0) + 
+  transition_states(timestamp_log, transition_length = 0.5, state_length = 0) + 
   enter_fade() + 
   shadow_mark(color = "grey") +
   israel_boundaries + 
   saridr::theme_sarid() +
+  guides(color = guide_legend("")) +
   theme(plot.title = element_text(hjust = 0),
         plot.subtitle = element_text(hjust = 0),
         axis.text = element_blank(),
