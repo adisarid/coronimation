@@ -3,7 +3,8 @@
 
 library(tidyverse)
 
-corona_db <- read_csv("data/2020-03-14 - corona_locations.csv") %>% 
+corona_db <- map_df(dir("data/", full.names = T), read_csv) %>% 
+  distinct(OBJECTID, .keep_all = T) %>% 
   set_names(c("object_id",
               "patient_name",
               "location",
@@ -14,7 +15,7 @@ corona_db <- read_csv("data/2020-03-14 - corona_locations.csv") %>%
               "x",
               "y"
               )) %>% 
-  mutate(timestamp_log = lubridate::dmy(timestamp)) %>% 
+  mutate(timestamp_log = lubridate::dmy(timestamp)) %>%
   mutate(is_tourist = ifelse(str_detect(patient_name, "תייר"),
                              "תייר",
                              "מקומי"))
@@ -24,7 +25,7 @@ israel_boundaries <- borders(database = "world", regions = "israel",
 
 # Creates a static map ----------------------------------------------------
 
-static_coronamap <- ggplot(corona_db, aes(x, y, color = is_tourist)) + 
+static_coronamap <- ggplot(corona_db, aes(x, y)) + 
   israel_boundaries + 
   geom_point() +
   coord_equal() + 
@@ -38,7 +39,7 @@ static_coronamap <- ggplot(corona_db, aes(x, y, color = is_tourist)) +
 
 library(gganimate)
 
-coronimation <- ggplot(corona_db, aes(x, y, group = object_id, color = is_tourist, shape = is_tourist)) +
+coronimation <- ggplot(corona_db, aes(x, y, group = object_id)) +
   labs(title = "Corona exposure in Israel",
        subtitle = "{closest_state}",
        caption = "Based on MOH data, see http://bit.ly/corona_il\n
