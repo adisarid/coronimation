@@ -56,3 +56,28 @@ coronimation <- ggplot(corona_db, aes(x, y, group = object_id)) +
         plot.subtitle = element_text(hjust = 0),
         axis.text = element_blank(),
         axis.title = element_blank())
+
+# Use stamenmaps ----------------------------------------------------------
+
+library(ggmap)
+israel <- c(left = 34, bottom = 29.5, right = 36, top = 33.5)
+stamemaps_data <- get_stamenmap(israel, zoom = 8, maptype = "terrain-background") %>% ggmap() 
+
+static_coronamap_terrain <- stamemaps_data + 
+  geom_point(data = corona_db, aes(x, y), inherit.aes = F)
+
+coronimation_stamenmaps <- stamemaps_data + 
+  labs(title = "Corona exposure in Israel",
+       subtitle = "{closest_state}",
+       caption = "Based on MOH data, see http://bit.ly/corona_il\n
+       Created by Adi Sarid https://adisarid.github.io") +
+  geom_point(data = corona_db, aes(x, y, group = object_id)) +
+  transition_states(timestamp_log, transition_length = 0.5, state_length = 0) + 
+  enter_fade() + 
+  shadow_mark(color = "grey") +
+  saridr::theme_sarid() +
+  guides(color = guide_legend("")) +
+  theme(plot.title = element_text(hjust = 0),
+        plot.subtitle = element_text(hjust = 0),
+        axis.text = element_blank(),
+        axis.title = element_blank())
